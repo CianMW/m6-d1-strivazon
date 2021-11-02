@@ -91,10 +91,10 @@ productsRouter.post(
 
 productsRouter.get("/", async (req, res, next) => {
   try {
-    const fileAsBuffer = await getProducts();
-   // const fileAsString = fileAsBuffer.toString();
-    // const fileAsJSON = JSON.parse(fileAsString);
-    res.send(fileAsBuffer);
+    const data = await pool.query("SELECT * FROM products ORDER BY id ASC;");
+    //gets all the products and orders them numerically by ID 
+    res.send(data.rows);
+    //sends all data (each row together)
   } catch (error) {
     res.send(500).send({ message: error.message });
   }
