@@ -55,12 +55,11 @@ reviewsRouter.post("/", async (req, res, next) => {
   reviewsRouter.get("/:id", async (req, res, next) =>{
     try{
       console.log(req)
-      const reviews  = await getReviews()
-      const findReviews = reviews.find(rev => rev.id === req.params.id)
-      if(findReviews){
-        res.send({findReviews})
+      const data = await pool.query(`SELECT * FROM reviews WHERE id=${req.params.id}`);
+      if (data.rows.length === 0) {
+        res.status(400).send("User not found");
       } else {
-        next(createHttpError(404, `Reviews with the id ${req.params.id} don't exist` ))
+        res.send(data.rows[0]);
       }
     }catch(error){
       next(error)
