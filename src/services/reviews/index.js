@@ -83,27 +83,13 @@ reviewsRouter.post("/", async (req, res, next) => {
   })
 // DELETE /authors/123 => delete the author with the given id
 reviewsRouter.delete("/:id", async (req, res, next) =>{
-  try{
-    const reviews  = await getReviews()
-    const foundReview = reviews.find(rev => rev._id === req.params.id)
-    
-    if(foundReview){
-      const afterDeletion = reviews.filter(rev => rev.id !== req.params.id)
-      await writeReviewsToFile(afterDeletion)
-
-      res.status(200).send({response: "deletion complete!"})
-
-
-  }else{
-    next(createHttpError(404, `Reviews with the id ${req.params.id} doesn't exist` ))
+  try {
+    await pool.query(`DELETE FROM REVIEWS WHERE id=${req.params.id}`);
+    res.status(204).send(`content with the id: ${req.params.id} has been deleted`);
+  } catch (error) {
+    res.status(500).send({ message: error.message });
   }
-    
-  }catch(error){
-    next(error)
-  }
-
-})
-
+});
 
 
 export default reviewsRouter
