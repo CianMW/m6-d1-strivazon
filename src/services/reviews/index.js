@@ -69,19 +69,12 @@ reviewsRouter.post("/", async (req, res, next) => {
 
   reviewsRouter.put("/:id", async (req, res, next) =>{
     try{
-      const reviews  = await getReviews()
-      const index = reviews.findIndex(rev => rev._id === req.params.id)
-      
-      if(index !== -1){
-        const editedReview = {...reviews[index], ...req.body , updatedAt : new Date}
-
-      reviews[index] = editedReview
-
-      await writeReviewsToFile(reviews)
-      res.send(editedReview)
-    }else{
-      next(createHttpError(404, `Reviews with the id ${req.params.id} don't exist` ))
-    }
+      const { comment, product_id, rate} = req.body;
+      const data = await pool.query(
+      `UPDATE reviews SET comment=$1,product_id=$2,rate=$3 WHERE id=${req.params.id} RETURNING *;`,
+      [ comment, product_id, rate]
+      );
+      res.status(200).send(data.rows[0])
       
     }catch(error){
       next(error)
