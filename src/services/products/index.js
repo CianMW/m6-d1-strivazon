@@ -220,25 +220,8 @@ productsRouter.put("/:id", async (req, res, next) => {
 
 productsRouter.delete("/:id", async (req, res, next) => {
   try {
-    const products = await getProducts();
-
-   // const fileAsString = fileAsBuffer.toString();
-
-   // let fileAsJSONArray = JSON.parse(fileAsString);
-
-    const product = products.find(
-      (prod) => prod._id === req.params.id
-    );
-    if (!product) {
-      res
-        .status(404)
-        .send({ message: `Product with ${req.params.id} is not found!` });
-    }else {
-    const afterDeletion = products.filter(
-      (prod) => prod._id !== req.params.id
-    );
-    writeProductsToFile(afterDeletion)
-    res.status(204).send("Deletion complete");}
+    await pool.query(`DELETE FROM products WHERE id=${req.params.id}`);
+    res.status(204).send(`content with the id: ${req.params.id}  has been deleted`);
   } catch (error) {
     res.status(500).send({ message: error.message });
   }
