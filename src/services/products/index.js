@@ -50,6 +50,8 @@ productsRouter.post(
   async (req, res, next) => {
     try {
       if (req.file) {
+
+        
         console.log(req.file);
         console.log("This is the id: ", req.params.id);
         const newFileName = req.params.id + req.file.originalname;

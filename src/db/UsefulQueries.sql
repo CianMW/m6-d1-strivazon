@@ -1,3 +1,13 @@
+-----Useful example queries from Ubeyt's code 
+
+
+
+
+
+
+
+
+
 INSERT INTO users(name,last_name,email) VALUES('Abnet','Nega','abnet_nega@strive.school');
  INSERT INTO users(name,last_name,email) VALUES('adam','Belahouane','adam_belahouane@strive.school');
  INSERT INTO users(name,last_name,email) VALUES('Bogdan','Birau','bogdan_birau@strive.school');

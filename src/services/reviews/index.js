@@ -4,6 +4,7 @@ import { validationResult } from "express-validator"
 import createHttpError from "http-errors"
 import { getReviews, writeReviewsToFile } from "../../lib/functions.js"
 import { reviewValidation } from "./validation.js"
+import pool from "../../db/connect.js"
 
 
 const reviewsRouter = express.Router()
@@ -26,43 +27,29 @@ const reviewsRouter = express.Router()
 
 reviewsRouter.get("/", async (req, res, next) => {
     try{
-      const errorList = validationResult(req)
-
-      if(!errorList.isEmpty()){
-          next(createHttpError(400, { errorsList })) //fires the error response
-      } else {
-
-          console.log(req.body)
-
-  
-  const arrayOfReviews = await getReviews()
-
-  res.send(arrayOfReviews)
+        console.log(req.body)
+      const data = await pool.query("SELECT * FROM reviews ORDER BY id ASC;");
+      res.send(data.rows);
   }
-  }catch(error){next(error)}
+   catch(error) {
+    next(error)
+  }
 })
 
-reviewsRouter.post("/", reviewValidation , async (req, res, next) => {
-    try{
-        const errorList = validationResult(req)
-        console.log(errorList)
+reviewsRouter.post("/", async (req, res, next) => {
 
-        if(!errorList.isEmpty()){
-            next(createHttpError(400, { errorList })) //fires the error response
-        } else {
-
-            console.log(req.body)
-  
-    const newReview = { ...req.body, _id: uniqid(),  createdAt: new Date}
-    const reviews = await getReviews()
-    reviews.push(newReview)
-    await writeReviewsToFile(reviews)
- 
-    res.send({id: newReview._id})
+        console.log(req.body)
+        const {comment, rate, product_id} = req.body;
+        const data = await pool.query(
+          "INSERT INTO reviews(comment, rate, product_id) VALUES($1, $2, $3) RETURNING *;",
+            [comment, rate, product_id]
+            );
+        
+            res.send(data.rows[0]);
     }
-    }catch(error){next(error)}
 
-  })
+
+  )
 
   //GET /authors/123 => returns a single author
   reviewsRouter.get("/:id", async (req, res, next) =>{
