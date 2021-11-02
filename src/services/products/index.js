@@ -139,39 +139,23 @@ productsRouter.get("/:id", async (req, res, next) => {
 
     res.status(200).send(product);
   } catch (error) {
-    res.send(500).send({ message: error.message });
+    res.status(500).send({ message: error.message });
   }
 });
 
 productsRouter.put("/:id", async (req, res, next) => {
   try {
-    const products = await getProducts();
 
-    // const fileAsString = fileAsBuffer.toString();
+    const { name, description, brand, price, category } = req.body;
+    const data = await pool.query(
+    `UPDATE products SET name=$1,description=$2,brand=$3,price=$4,category=$5 WHERE id=${req.params.id} RETURNING *;`,
+    [name, description, brand, price, category]
+    
 
-    // let fileAsJSONArray = JSON.parse(fileAsString);
-
-    const productIndex = products.findIndex(
-      (product) => product.id === req.params.id
     );
-    if (!productIndex == -1) {
-      res
-        .status(404)
-        .send({ message: `Product with ${req.params.id} is not found!` });
-    }
-    const previousProductData = products[productIndex];
-    const changedProduct = {
-      ...previousProductData,
-      ...req.body,
-      updatedAt: new Date(),
-      id: req.params.id,
-    };
-    products[productIndex] = changedProduct;
-    writeProductsToFile(products)
-    //fs.writeFileSync(productsFilePath, JSON.stringify(fileAsJSONArray));
-    res.status(200).send(changedProduct);
+    res.status(200).send(data.rows[0])
   } catch (error) {
-    res.send(500).send({ message: error.message });
+    res.status(500).send({ message: error.message });
   }
 });
 
