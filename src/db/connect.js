@@ -1,6 +1,7 @@
 
 //install "pg" to work with postgres
 import dotenv from 'dotenv/config';
+//dotenv needs to be imported => corrects error "password must be string"
  import pg from "pg";
 
  /**

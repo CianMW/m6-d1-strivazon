@@ -6,44 +6,35 @@ import { productValidation  } from "./validation.js";
 import { getProducts, getReviews, writeProductsToFile, saveImages } from "../../lib/functions.js";
 import multer from "multer";
 import { validationResult } from "express-validator";
+import pool from "../../db/connect.js";
 // import { parseFile, uploadFile } from "../utils/upload/index.js";
+
+
+
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const productsFilePath = path.join(__dirname, "products.json");
 const productsRouter = express.Router();
 
 // Post Product
-
 productsRouter.post("/", productValidation, async (req, res, next) => {
   try {
     const errorsList = validationResult(req);
     if (!errorsList.isEmpty()) {
       next(createHttpError(400, { errorsList }));
     } else {
-        const { name, description, brand, imageUrl, price, category } = req.body;
-        const product = {
-          _id: uniqid(),
+      try {
+        const { name, description, brand, price, category } = req.body;
+        const data = await pool.query(
+          "INSERT INTO products(name,description,brand,price, category) VALUES($1,$2,$3,$4,$5) RETURNING *;",
+          [ name, description, brand, price, category]
+        );
     
-          name,
-          description,
-          brand,
-          imageUrl,
-          price,
-          category,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        };
-    
-        const products = await getProducts();
-        // const fileAsString = fileAsBuffer.toString();
-        // const fileAsJSONArray = JSON.parse(fileAsString);
-    
-        products.push(product);
-        
-        writeProductsToFile(products)
-       // fs.writeFileSync(productsFilePath, JSON.stringify(fileAsJSONArray));
-    
-        res.status(200).send(product);
+        res.send(data.rows[0]);
+      } catch (error) {
+        res.status(400).send(error.message);
+      }
 
     }
   } catch (error) {
